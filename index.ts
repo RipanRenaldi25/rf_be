@@ -54,9 +54,9 @@ const init = async () => {
     })
   );
 
-  app.listen(process.env.PORT_APP ? +process.env.PORT_APP : 3000, () => {
-    console.log(`server running on port ${process.env.PORT_APP ?? 3000}`);
-    console.log({ portEnv: process.env.PORT_APP });
+  app.listen(process.env.PORT ? +process.env.PORT : 3000, () => {
+    console.log(`server running on port ${process.env.PORT ?? 3000}`);
+    console.log({ portEnv: process.env.PORT });
   });
 };
 
