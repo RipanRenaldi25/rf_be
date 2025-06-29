@@ -22,7 +22,7 @@ const init = async () => {
     plugins: [
       process.env.NODE_ENV === "production"
         ? ApolloServerPluginLandingPageProductionDefault({
-            graphRef: "my-graph-id@my-graph-variant",
+            graphRef: `${process.env.GRAPHQL_ID}@current`,
             footer: false,
           })
         : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
