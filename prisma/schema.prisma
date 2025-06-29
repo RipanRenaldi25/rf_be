@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  phone_number String @db.VarChar(255)
+  email String @db.VarChar(255) @unique
+  password String @db.VarChar(255)
+  company_name String @db.VarChar(255) @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  materials Material[]
+  shelf Shelf[]
+  material_calculator MaterialCalculator[]
+
+  @@map("users")
+}
+ 
+enum MATERIAL_TYPE {
+  WASTE
+  REUSE
+  REUTILIZATION
+}
+
+model Shelf {
+  id Int @db.Int @id @default(autoincrement())
+  rack String @db.VarChar(255) 
+  number Int @db.Int
+  user_id Int @db.Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  inventory_transactions InventoryTransaction[]
+  histories History[]
+
+
+  @@unique([rack, number, user_id])
+  @@map("shelfs")
+}
+
+model Material {
+  id Int @id @default(autoincrement())
+  name String
+  detail String
+  color String? @db.VarChar(255)
+  stock Decimal @db.Decimal(10,2) @default(0)
+  type MATERIAL_TYPE
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  user_id Int
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  inventory_transactions InventoryTransaction[]
+  histories History[]
+
+  @@unique([name, detail, color, type, user_id])
+  @@map("materials")
+}
+
+enum MOVEMENT_TYPE {
+  IN
+  OUT
+}
+
+model InventoryTransaction {
+  id Int @id @default(autoincrement())
+  material_id Int
+  movement MOVEMENT_TYPE
+  stock Decimal @db.Decimal(10, 2)
+  created_at DateTime @default(now()) 
+  updated_at DateTime @default(now())
+  shelf_id Int @db.Int @default(0)
+  
+  material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
+  shelf Shelf @relation(fields: [shelf_id], references: [id], onDelete: Cascade)
+
+  @@map("inventory_transactions")
+}
+
+model History {
+  id Int @id @default(autoincrement())
+  material_id Int
+  movement MOVEMENT_TYPE
+  stock Decimal @db.Decimal(10, 2)
+  created_at DateTime @default(now()) 
+  updated_at DateTime @default(now())
+  shelf_id Int @db.Int @default(0)
+
+  material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
+  shelf Shelf @relation(fields: [shelf_id], references: [id], onDelete: Cascade)
+
+  @@map("histories")
+}
+
+model MaterialCalculator {
+  id Int @db.Int @default(autoincrement()) @id
+  name String @db.VarChar(255)
+  weight_required Decimal @db.Decimal(10, 2)
+  user_id Int
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("material_calculators")
+}
