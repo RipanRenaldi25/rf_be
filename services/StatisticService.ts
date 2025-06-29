@@ -27,7 +27,7 @@ export const StatisticService = {
 
   getWeekUsageStatistic: async (userId: number) => {
     const summary = (await prismaClient.$queryRaw`
-      SELECT week, ROUND(SUM( CASE WHEN movement="OUT" AND materials.type != "WASTE" THEN tx.stock ELSE 0 END ) / SUM(CASE WHEN materials.type != "WASTE" THEN tx.stock ELSE 0 END) * 100, 2) AS used_percentage, ROUND( SUM(CASE WHEN movement != "OUT" AND materials.type != "WASTE" THEN tx.stock ELSE 0 END) / sum( CASE WHEN materials.type != "WASTE" THEN tx.stock ELSE 0 END) * 100, 2 ) AS unused_percentage  FROM (
+      SELECT week, ROUND(SUM( CASE WHEN movement="OUT" AND materials.type != "WASTE" THEN tx.stock ELSE 0 END ) / SUM(CASE WHEN materials.type != "WASTE" AND movement = "IN" THEN tx.stock ELSE 0 END) * 100, 2) AS used_percentage, ROUND( SUM(CASE WHEN movement != "OUT" AND materials.type != "WASTE" THEN tx.stock ELSE 0 END) / sum( CASE WHEN materials.type != "WASTE" THEN tx.stock ELSE 0 END) * 100, 2 ) AS unused_percentage  FROM (
       SELECT *, CASE WHEN DAY(created_at) BETWEEN 1 AND 7 THEN 1 WHEN DAY(created_at) BETWEEN 8 AND 15 THEN 2 WHEN DAY(created_at) BETWEEN 16 AND 21 THEN 3 ELSE 4 END AS week FROM histories) AS tx JOIN materials ON materials.id = tx.material_id WHERE materials.user_id = ${userId} AND MONTH(NOW()) = MONTH(tx.created_at) GROUP BY week ORDER BY week ASC
     `) as any;
 

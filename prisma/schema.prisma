@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -38,10 +38,10 @@ enum MATERIAL_TYPE {
 }
 
 model Shelf {
-  id Int @db.Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   rack String @db.VarChar(255) 
-  number Int @db.Int
-  user_id Int @db.Int
+  number Int 
+  user_id Int
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   inventory_transactions InventoryTransaction[]
@@ -83,7 +83,7 @@ model InventoryTransaction {
   stock Decimal @db.Decimal(10, 2)
   created_at DateTime @default(now()) 
   updated_at DateTime @default(now())
-  shelf_id Int @db.Int @default(0)
+  shelf_id Int @default(0)
   
   material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
   shelf Shelf @relation(fields: [shelf_id], references: [id], onDelete: Cascade)
@@ -98,7 +98,7 @@ model History {
   stock Decimal @db.Decimal(10, 2)
   created_at DateTime @default(now()) 
   updated_at DateTime @default(now())
-  shelf_id Int @db.Int @default(0)
+  shelf_id Int @default(0)
 
   material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
   shelf Shelf @relation(fields: [shelf_id], references: [id], onDelete: Cascade)
@@ -107,7 +107,7 @@ model History {
 }
 
 model MaterialCalculator {
-  id Int @db.Int @default(autoincrement()) @id
+  id Int @default(autoincrement()) @id
   name String @db.VarChar(255)
   weight_required Decimal @db.Decimal(10, 2)
   user_id Int
