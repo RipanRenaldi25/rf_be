@@ -9,12 +9,24 @@ import { AuthorizationError } from "./utils/error/AuthorizationError";
 import jwt from "jsonwebtoken";
 import { prismaClient } from "./prismaClient";
 import { handleError } from "./utils/error/HandleError";
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from "@apollo/server/plugin/landingPage/default";
 dotenv.config();
 
 const init = async () => {
   const apolloInstance = new ApolloServer({
     typeDefs,
     resolvers: resolver,
+    plugins: [
+      process.env.NODE_ENV === "production"
+        ? ApolloServerPluginLandingPageProductionDefault({
+            graphRef: "my-graph-id@my-graph-variant",
+            footer: false,
+          })
+        : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+    ],
   });
   const app = express();
   app.use(cors());
@@ -55,8 +67,8 @@ const init = async () => {
   );
 
   app.listen(process.env.PORT ? +process.env.PORT : 3000, () => {
+    console.log({ portEnv: process.env.PORT, env: process.env.NODE_ENV });
     console.log(`server running on port ${process.env.PORT ?? 3000}`);
-    console.log({ portEnv: process.env.PORT });
   });
 };
 

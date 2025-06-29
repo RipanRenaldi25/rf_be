@@ -22,11 +22,20 @@ const resolvers_1 = require("./resolvers");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prismaClient_1 = require("./prismaClient");
 const HandleError_1 = require("./utils/error/HandleError");
+const default_1 = require("@apollo/server/plugin/landingPage/default");
 dotenv_1.default.config();
 const init = () => __awaiter(void 0, void 0, void 0, function* () {
     const apolloInstance = new server_1.ApolloServer({
         typeDefs: typeDefs_1.typeDefs,
         resolvers: resolvers_1.resolver,
+        plugins: [
+            process.env.NODE_ENV === "production"
+                ? (0, default_1.ApolloServerPluginLandingPageProductionDefault)({
+                    graphRef: "my-graph-id@my-graph-variant",
+                    footer: false,
+                })
+                : (0, default_1.ApolloServerPluginLandingPageLocalDefault)({ footer: false }),
+        ],
     });
     const app = (0, express_1.default)();
     app.use((0, cors_1.default)());
@@ -55,10 +64,10 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
             return { user };
         }),
     }));
-    app.listen(process.env.PORT_APP ? +process.env.PORT_APP : 3000, () => {
+    app.listen(process.env.PORT ? +process.env.PORT : 3000, () => {
         var _a;
-        console.log(`server running on port ${(_a = process.env.PORT_APP) !== null && _a !== void 0 ? _a : 3000}`);
-        console.log({ portEnv: process.env.PORT_APP });
+        console.log({ portEnv: process.env.PORT, env: process.env.NODE_ENV });
+        console.log(`server running on port ${(_a = process.env.PORT) !== null && _a !== void 0 ? _a : 3000}`);
     });
 });
 init().catch((err) => console.log(err));
